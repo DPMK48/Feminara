@@ -1,15 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AppIcon from '../AppIcon';
 
 const symptoms = ['Mood', 'Cramps', 'Flow', 'Energy', 'Headache', 'Bloating'];
 
+const STORAGE_KEYS = {
+  periodStart: 'feminara_period_start',
+  periodDuration: 'feminara_period_duration',
+  trackerOpen: 'feminara_period_tracker_open',
+};
+
 export default function Bloom() {
+  const [trackerOpen, setTrackerOpen] = useState(true);
+  const [periodStart, setPeriodStart] = useState<string>('');
+  const [periodDuration, setPeriodDuration] = useState<number>(28);
   const [activeSyms, setActiveSyms] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedStart = localStorage.getItem(STORAGE_KEYS.periodStart);
+    const storedDuration = localStorage.getItem(STORAGE_KEYS.periodDuration);
+    const storedOpen = localStorage.getItem(STORAGE_KEYS.trackerOpen);
+
+    if (storedStart) setPeriodStart(storedStart);
+    if (storedDuration) setPeriodDuration(Number(storedDuration));
+    if (storedOpen) setTrackerOpen(storedOpen === 'true');
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEYS.periodStart, periodStart);
+    localStorage.setItem(STORAGE_KEYS.periodDuration, String(periodDuration));
+    localStorage.setItem(STORAGE_KEYS.trackerOpen, String(trackerOpen));
+  }, [periodStart, periodDuration, trackerOpen]);
 
   const toggleSym = (s: string) =>
     setActiveSyms((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+
+  const nextPeriodDate = useMemo(() => {
+    if (!periodStart) return null;
+    const start = new Date(periodStart);
+    if (Number.isNaN(start.getTime())) return null;
+    const next = new Date(start);
+    next.setDate(next.getDate() + periodDuration);
+    return next;
+  }, [periodStart, periodDuration]);
+
+  const cycleDay = useMemo(() => {
+    if (!periodStart) return null;
+    const start = new Date(periodStart);
+    if (Number.isNaN(start.getTime())) return null;
+    const diff = Math.floor((Date.now() - start.getTime()) / (1000 * 60 * 60 * 24));
+    return diff >= 0 ? (diff % periodDuration) + 1 : null;
+  }, [periodStart, periodDuration]);
+
+  const nextPeriodLabel = nextPeriodDate
+    ? nextPeriodDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'Set your last period start';
 
   return (
     <div className="section-scroll">
@@ -44,7 +92,7 @@ export default function Bloom() {
           <div className="cycle-ring mb-3">
             <div className="cycle-ring-inner">
               <p className="text-2xl font-bold" style={{ color: '#0B4F6C' }}>
-                14
+                {cycleDay ?? '—'}
               </p>
               <p className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
                 Day
@@ -55,12 +103,12 @@ export default function Bloom() {
             Follicular Phase
           </p>
           <p className="text-xs mt-0.5" style={{ color: '#7CCFDE' }}>
-            Next period in 14 days
+            {nextPeriodDate ? `Next period on ${nextPeriodLabel}` : nextPeriodLabel}
           </p>
           <div className="flex gap-6 mt-4">
             {[
-              { label: 'Cycle length', value: '28 days' },
-              { label: 'Period length', value: '5 days' },
+              { label: 'Cycle length', value: `${periodDuration} days` },
+              { label: 'Period length', value: '—' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="text-sm font-bold" style={{ color: '#0B4F6C' }}>
@@ -72,6 +120,86 @@ export default function Bloom() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Period tracker */}
+        <div className="card p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold" style={{ color: '#0B4F6C' }}>
+              Period Tracker
+            </p>
+            <button
+              onClick={() => setTrackerOpen((prev) => !prev)}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: '#2899B4',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              {trackerOpen ? 'Hide' : 'Show'}
+            </button>
+          </div>
+
+          {trackerOpen && (
+            <>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
+                    Last period start
+                  </label>
+                  <input
+                    type="date"
+                    value={periodStart}
+                    onChange={(e) => setPeriodStart(e.target.value)}
+                    className="input-field"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
+                    Period duration (days)
+                  </label>
+                  <input
+                    type="number"
+                    min={21}
+                    max={45}
+                    value={periodDuration}
+                    onChange={(e) => setPeriodDuration(Number(e.target.value))}
+                    className="input-field"
+                  />
+                  <span className="text-[11px]" style={{ color: '#B0E4EF' }}>
+                    Average days between periods
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
+                    Next period
+                  </label>
+                  <div
+                    className="rounded-xl px-3 py-2 text-sm font-semibold"
+                    style={{ background: '#EBF8FC', color: '#0B4F6C', minHeight: 42 }}
+                  >
+                    {nextPeriodDate ? nextPeriodLabel : '—'}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
+                    Cycle day
+                  </label>
+                  <div
+                    className="rounded-xl px-3 py-2 text-sm font-semibold"
+                    style={{ background: '#EBF8FC', color: '#0B4F6C', minHeight: 42 }}
+                  >
+                    {cycleDay ?? '—'}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Phase info */}
