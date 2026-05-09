@@ -179,11 +179,12 @@ export default function Bloom() {
                   <label className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
                     Next period
                   </label>
-                  <div>
+                  <div
                     className="rounded-xl px-3 py-2 text-sm font-semibold"
                     style={{ background: '#EBF8FC', color: '#0B4F6C', minHeight: 42 }}
+                  >
                     {nextPeriodDate ? nextPeriodLabel : '—'}
-                  </div>
+                  </div>      
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
