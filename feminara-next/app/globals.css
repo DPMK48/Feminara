@@ -64,15 +64,15 @@ body {
 
 /* ── Screen header padding ── */
 .screen-hdr {
-  padding: 24px 20px 0;
+  padding: 18px 16px 0;
 }
 
 @media (min-width: 768px) {
-  .screen-hdr { padding: 32px 32px 0; }
+  .screen-hdr { padding: 28px 28px 0; }
 }
 
 @media (min-width: 1024px) {
-  .screen-hdr { padding: 36px 40px 0; }
+  .screen-hdr { padding: 32px 36px 0; }
 }
 
 /* ── Sidebar button ── */
@@ -140,7 +140,7 @@ body {
 
 /* ── Scrollable sections ── */
 .section-scroll {
-  padding: 0 20px 80px;
+  padding: 0 0 80px;
   overflow-y: auto;
   height: calc(100vh - 64px);
 }

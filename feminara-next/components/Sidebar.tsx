@@ -2,6 +2,7 @@
 
 import AppIcon, { type AppIconName } from './AppIcon';
 import FlowerLogo from './FlowerLogo';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Screen = 'home' | 'journal' | 'community' | 'flourish' | 'spark' | 'glow' | 'bloom' | 'profile';
 
@@ -24,6 +25,9 @@ const sections: { id: Screen; icon: AppIconName; label: string }[] = [
 ];
 
 export default function Sidebar({ current, onNavigate }: SidebarProps) {
+  const { user } = useAuth();
+  const firstName = user?.name?.split(' ')[0] ?? 'User';
+  const firstInitial = firstName[0]?.toUpperCase() ?? 'U';
   return (
     <nav id="sidebar">
       {/* Logo */}
@@ -103,13 +107,13 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
             minWidth: 32,
           }}
         >
-          A
+          {firstInitial}
         </div>
         <span
           className="sb-label hidden text-sm font-medium"
           style={{ color: 'rgba(255,255,255,0.9)', display: 'none' }}
         >
-          Amara
+          {firstName}
         </span>
       </button>
     </nav>

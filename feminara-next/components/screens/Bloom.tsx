@@ -145,7 +145,7 @@ export default function Bloom() {
 
           {trackerOpen && (
             <>
-              <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="flex flex-col gap-3 mb-3 md:grid md:grid-cols-2">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
                     Last period start
@@ -174,15 +174,14 @@ export default function Bloom() {
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-3 md:grid md:grid-cols-2">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium" style={{ color: '#7CCFDE' }}>
                     Next period
                   </label>
-                  <div
+                  <div>
                     className="rounded-xl px-3 py-2 text-sm font-semibold"
                     style={{ background: '#EBF8FC', color: '#0B4F6C', minHeight: 42 }}
-                  >
                     {nextPeriodDate ? nextPeriodLabel : '—'}
                   </div>
                 </div>

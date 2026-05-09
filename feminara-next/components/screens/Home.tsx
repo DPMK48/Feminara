@@ -55,6 +55,7 @@ export default function Home({ onNavigate }: HomeProps) {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const affirmation = affirmations[today.getDate() % affirmations.length];
   const firstName = user?.name?.split(' ')[0] ?? 'Friend';
+  const firstInitial = firstName?.[0]?.toUpperCase() ?? 'F';
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -93,7 +94,7 @@ export default function Home({ onNavigate }: HomeProps) {
               justifyContent: 'center',
             }}
           >
-            A
+            {firstInitial}
           </button>
         </div>
 
