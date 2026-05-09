@@ -13,7 +13,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: 'Feminara',
-  description: 'Your everyday companion',
+  description: 'Supporting women, every day',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

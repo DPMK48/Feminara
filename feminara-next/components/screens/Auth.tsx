@@ -72,7 +72,7 @@ export default function Auth({ onAuth }: AuthProps) {
           FEMINARA
         </h1>
         <p className="text-sm font-light" style={{ color: '#2899B4' }}>
-          your everyday companion
+          Supporting women, every day
         </p>
       </div>
 

@@ -20,7 +20,7 @@ export default function Splash({ onContinue }: SplashProps) {
             FEMINARA
           </h1>
           <p className="text-white font-light text-base" style={{ opacity: 0.85 }}>
-            your everyday companion
+            Supporting women, every day
           </p>
         </div>
 
