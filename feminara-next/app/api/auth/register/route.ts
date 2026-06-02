@@ -1,28 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
-import { signToken } from '@/lib/auth';
+import { normalizePhone } from '@/lib/phone';
+import { sendSms } from '@/lib/sms';
 
 export async function POST(req: NextRequest) {
-  const { name, email, password } = await req.json();
+  const { name, phone } = await req.json();
 
-  if (!name?.trim() || !email?.trim() || !password) {
-    return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+  if (!name?.trim() || !phone?.trim()) {
+    return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
   }
 
-  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  const normalizedPhone = normalizePhone(phone);
+  const existing = await prisma.user.findUnique({ where: { phone: normalizedPhone } });
   if (existing) {
-    return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
+    return NextResponse.json({ error: 'Phone number already registered' }, { status: 409 });
   }
 
-  const hashed = await bcrypt.hash(password, 12);
-  const user = await prisma.user.create({
-    data: { name: name.trim(), email: email.toLowerCase(), password: hashed },
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  await prisma.phoneVerification.upsert({
+    where: { phone: normalizedPhone },
+    update: { name: name.trim(), code, expiresAt },
+    create: { name: name.trim(), phone: normalizedPhone, code, expiresAt },
   });
 
-  const token = signToken({ userId: user.id });
-  return NextResponse.json({
-    token,
-    user: { id: user.id, name: user.name, email: user.email },
+  const smsResult = await sendSms({
+    to: normalizedPhone,
+    body: `Your Feminara signup code is ${code}. It expires in 10 minutes.`,
   });
+
+  if (!smsResult.ok) {
+    if (smsResult.error === 'Twilio not configured') {
+      return NextResponse.json({ ok: true, simulatedCode: code });
+    }
+    return NextResponse.json({ error: smsResult.error ?? 'Failed to send SMS' }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
 }

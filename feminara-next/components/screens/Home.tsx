@@ -41,19 +41,36 @@ const featureCards: { id: Screen; icon: AppIconName; title: string; sub: string;
   },
 ];
 
-const affirmations = [
-  'You are strong, capable, and worthy of every good thing.',
-  'Your growth and healing matter deeply.',
-  'Today, you choose yourself — and that is enough.',
+const fallbackQuote = {
+  quote: 'Your future needs your best today.',
+  author: 'Unknown',
+};
+
+const notices = [
+  {
+    tag: 'Health Alert',
+    title: 'Breakout of Ebola virus nearby',
+    detail: 'Women should be cautious and seek care early for fever, weakness, or bleeding.',
+    tips: ['Wash hands often', 'Avoid direct contact with bodily fluids', 'Visit a clinic if symptoms appear'],
+    time: 'Today',
+  },
+  {
+    tag: 'Community Support',
+    title: 'Free fertilization distribution',
+    detail: 'Government distribution at East Market Clinic, 9am to 3pm this Friday.',
+    tips: ['Bring a valid ID', 'Arrive early for queue numbers', 'Ask the nurse for guidance'],
+    time: 'This week',
+  },
 ];
 
 export default function Home({ onNavigate }: HomeProps) {
   const { user } = useAuth();
   const [mood, setMood] = useState<string>('—');
+  const [dailyQuote, setDailyQuote] = useState(fallbackQuote);
+  const [quoteLoading, setQuoteLoading] = useState(true);
   const today = new Date();
   const hour = today.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const affirmation = affirmations[today.getDate() % affirmations.length];
   const firstName = user?.name?.split(' ')[0] ?? 'Friend';
   const firstInitial = firstName?.[0]?.toUpperCase() ?? 'F';
 
@@ -61,6 +78,45 @@ export default function Home({ onNavigate }: HomeProps) {
     if (typeof window === 'undefined') return;
     const savedMood = localStorage.getItem('feminara_mood');
     setMood(savedMood ?? '—');
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const cached = localStorage.getItem(`feminara_daily_quote_${todayKey}`);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed?.quote && parsed?.author) {
+          setDailyQuote(parsed);
+          setQuoteLoading(false);
+          return;
+        }
+      } catch {
+        // Ignore cache parse issues.
+      }
+    }
+
+    const loadQuote = async () => {
+      try {
+        const response = await fetch('/api/quotes/daily');
+        if (!response.ok) throw new Error('Failed to load quote');
+        const data = await response.json();
+        if (data?.quote && data?.author) {
+          setDailyQuote({ quote: data.quote, author: data.author });
+          localStorage.setItem(`feminara_daily_quote_${todayKey}`,
+            JSON.stringify({ quote: data.quote, author: data.author })
+          );
+        }
+      } catch {
+        setDailyQuote(fallbackQuote);
+      } finally {
+        setQuoteLoading(false);
+      }
+    };
+
+    loadQuote();
   }, []);
 
   return (
@@ -98,12 +154,19 @@ export default function Home({ onNavigate }: HomeProps) {
           </button>
         </div>
 
-        {/* Affirmation card */}
+        {/* Daily quote */}
         <div className="affirmation-card mb-5">
           <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ opacity: 0.7 }}>
-            Daily Affirmation
+            Daily Quote
           </p>
-          <p className="text-sm font-medium leading-relaxed">&ldquo;{affirmation}&rdquo;</p>
+          <p className="text-sm font-medium leading-relaxed">
+            {quoteLoading ? 'Loading today\'s quote...' : `"${dailyQuote.quote}"`}
+          </p>
+          {!quoteLoading && (
+            <p className="text-xs mt-2" style={{ color: '#7CCFDE' }}>
+              - {dailyQuote.author}
+            </p>
+          )}
         </div>
 
         {/* Stats row */}
@@ -128,19 +191,11 @@ export default function Home({ onNavigate }: HomeProps) {
         <h2 className="text-base font-semibold mb-3" style={{ color: '#0B4F6C' }}>
           Your Sections
         </h2>
-        <div className="feature-grid mb-6">
+        <div className="sections-grid mb-6">
           {featureCards.map((card) => (
             <button
               key={card.id}
-              className={`${card.grad} rounded-2xl p-4 text-white text-left cursor-pointer border-0 font-sans`}
-              style={{
-                minHeight: 120,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                transition: 'transform 0.15s, box-shadow 0.15s',
-                boxShadow: '0 4px 16px rgba(40,153,180,0.18)',
-              }}
+              className="section-tile-compact"
               onClick={() => onNavigate(card.id)}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)';
@@ -149,51 +204,37 @@ export default function Home({ onNavigate }: HomeProps) {
                 (e.currentTarget as HTMLElement).style.transform = '';
               }}
             >
-              <AppIcon name={card.icon} size={26} className="text-white" />
-              <div>
-                <p className="font-bold text-sm tracking-wide">{card.title}</p>
-                <p className="text-xs font-light opacity-80 leading-tight mt-0.5">{card.sub}</p>
+              <div className={`section-tile-compact__icon ${card.grad}`}>
+                <AppIcon name={card.icon} size={26} className="text-white" />
+              </div>
+              <div className="section-tile-compact__text">
+                <p className="section-tile-compact__title">{card.title}</p>
+                <p className="section-tile-compact__sub">{card.sub}</p>
               </div>
             </button>
           ))}
         </div>
 
-        {/* Recent activity */}
+        {/* Notice */}
         <h2 className="text-base font-semibold mb-3" style={{ color: '#0B4F6C' }}>
-          Recent Activity
+          Notice!
         </h2>
-        <div className="flex flex-col gap-3 mb-6">
-          {[
-            { icon: 'pen', title: 'Journal entry', sub: 'Gratitude & intentions', time: '2h ago' },
-            { icon: 'leaf', title: 'Mood logged', sub: 'Feeling calm & focused', time: 'Yesterday' },
-            { icon: 'flower', title: 'Cycle updated', sub: 'Day 14 — Follicular phase', time: 'Today' },
-          ].map((item, i) => (
-            <div key={i} className="card flex items-center gap-3 p-3">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 12,
-                  background: '#EBF8FC',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <AppIcon name={item.icon as AppIconName} size={20} className="text-[#2899B4]" />
+        <div className="flex flex-col gap-4 mb-6">
+          {notices.map((notice) => (
+            <div key={notice.title} className="notice-card">
+              <div className="notice-card__header">
+                <span className="notice-card__tag">{notice.tag}</span>
+                <span className="notice-card__time">{notice.time}</span>
               </div>
-              <div style={{ flex: 1 }}>
-                <p className="text-sm font-semibold" style={{ color: '#0B4F6C' }}>
-                  {item.title}
-                </p>
-                <p className="text-xs" style={{ color: '#7CCFDE' }}>
-                  {item.sub}
-                </p>
+              <h3 className="notice-card__title">{notice.title}</h3>
+              <p className="notice-card__detail">{notice.detail}</p>
+              <div className="notice-card__tips">
+                {notice.tips.map((tip) => (
+                  <span key={tip} className="notice-card__tip">
+                    {tip}
+                  </span>
+                ))}
               </div>
-              <span className="text-xs" style={{ color: '#B0E4EF' }}>
-                {item.time}
-              </span>
             </div>
           ))}
         </div>

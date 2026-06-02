@@ -60,10 +60,31 @@ export default function Bloom() {
     : 'Set your last period start';
 
   return (
-    <div className="section-scroll">
-      <div className="screen-hdr" style={{ paddingTop: 28 }}>
+    <div
+      className="section-scroll"
+      style={{
+        background:
+          'radial-gradient(circle at 15% 10%, rgba(30,136,229,0.12), transparent 45%), radial-gradient(circle at 85% 20%, rgba(42,157,143,0.12), transparent 40%)',
+      }}
+    >
+      <div className="screen-hdr" style={{ paddingTop: 28, position: 'relative' }}>
+        <div
+          aria-hidden="true"
+          className="spark-float"
+          style={{
+            position: 'absolute',
+            right: 18,
+            top: 10,
+            width: 120,
+            height: 120,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, rgba(30,136,229,0.18), rgba(42,157,143,0.2))',
+            filter: 'blur(6px)',
+            zIndex: 0,
+          }}
+        />
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-6" style={{ position: 'relative', zIndex: 1 }}>
           <div
             style={{
               width: 46,

@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const [user, journalCount, postCount] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, createdAt: true },
+      select: { id: true, name: true, phone: true, createdAt: true },
     }),
     prisma.journalEntry.count({ where: { userId } }),
     prisma.post.count({ where: { userId } }),
@@ -41,7 +41,7 @@ export async function PUT(req: NextRequest) {
   const user = await prisma.user.update({
     where: { id: userId },
     data: { name: name.trim() },
-    select: { id: true, name: true, email: true },
+    select: { id: true, name: true, phone: true },
   });
 
   return NextResponse.json({ user });

@@ -13,22 +13,40 @@ export default function Auth({ onAuth }: AuthProps) {
   const [tab, setTab] = useState<'login' | 'signup'>('login');
 
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [signupStep, setSignupStep] = useState<'details' | 'verify'>('details');
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     setError('');
-    if (!email.trim() || !password) { setError('Please fill in all fields'); return; }
-    if (tab === 'signup' && !name.trim()) { setError('Please enter your name'); return; }
+    setInfo('');
+
+    if (!phone.trim()) { setError('Please enter your phone number'); return; }
+    if (tab === 'signup' && signupStep === 'details' && !name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+    if (tab === 'signup' && signupStep === 'verify' && !code.trim()) {
+      setError('Please enter the verification code');
+      return;
+    }
 
     setLoading(true);
     try {
-      const endpoint = tab === 'login' ? '/api/auth/login' : '/api/auth/register';
+      const endpoint = tab === 'login'
+        ? '/api/auth/login'
+        : signupStep === 'details'
+          ? '/api/auth/register'
+          : '/api/auth/verify';
+
       const body = tab === 'login'
-        ? { email, password }
-        : { name, email, password };
+        ? { phone }
+        : signupStep === 'details'
+          ? { name, phone }
+          : { phone, code };
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -38,6 +56,16 @@ export default function Auth({ onAuth }: AuthProps) {
 
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? 'Something went wrong'); return; }
+
+      if (tab === 'signup' && signupStep === 'details') {
+        setSignupStep('verify');
+        if (data?.simulatedCode) {
+          setInfo(`Dev mode: use code ${data.simulatedCode} to verify.`);
+        } else {
+          setInfo('We sent a verification code to your phone.');
+        }
+        return;
+      }
 
       login(data.token, data.user);
       onAuth();
@@ -83,7 +111,13 @@ export default function Auth({ onAuth }: AuthProps) {
           {(['login', 'signup'] as const).map((t) => (
             <button
               key={t}
-              onClick={() => { setTab(t); setError(''); }}
+              onClick={() => {
+                setTab(t);
+                setError('');
+                setInfo('');
+                setSignupStep('details');
+                setCode('');
+              }}
               className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
               style={{
                 background: tab === t ? '#2899B4' : 'transparent',
@@ -110,20 +144,34 @@ export default function Auth({ onAuth }: AuthProps) {
           )}
           <input
             className="input-field"
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="tel"
+            inputMode="tel"
+            placeholder="Phone number"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           />
-          <input
-            className="input-field"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          />
+
+          {tab === 'signup' && signupStep === 'verify' && (
+            <input
+              className="input-field"
+              type="text"
+              inputMode="numeric"
+              placeholder="Verification code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+            />
+          )}
+
+          {info && (
+            <p
+              className="text-xs px-3 py-2 rounded-lg font-medium"
+              style={{ background: '#E0F2FE', color: '#0C4A6E' }}
+            >
+              {info}
+            </p>
+          )}
 
           {error && (
             <p
@@ -140,17 +188,15 @@ export default function Auth({ onAuth }: AuthProps) {
             className="btn-primary mt-1"
             style={{ opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? 'Please wait…' : tab === 'login' ? 'Sign In' : 'Create Account'}
+            {loading
+              ? 'Please wait…'
+              : tab === 'login'
+                ? 'Continue'
+                : signupStep === 'details'
+                  ? 'Send Code'
+                  : 'Verify & Create Account'}
           </button>
 
-          {tab === 'login' && (
-            <p className="text-center text-xs" style={{ color: '#7CCFDE' }}>
-              Forgot password?{' '}
-              <span className="font-semibold cursor-pointer" style={{ color: '#2899B4' }}>
-                Reset
-              </span>
-            </p>
-          )}
           {tab === 'signup' && (
             <p className="text-center text-xs" style={{ color: '#7CCFDE' }}>
               By signing up you agree to our{' '}

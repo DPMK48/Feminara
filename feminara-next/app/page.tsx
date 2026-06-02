@@ -19,6 +19,9 @@ import Profile from '@/components/screens/Profile';
 type FlowState = 'splash' | 'onboarding' | 'auth';
 type Screen = 'home' | 'journal' | 'community' | 'flourish' | 'spark' | 'glow' | 'bloom' | 'profile';
 
+const SCREEN_STORAGE_KEY = 'feminara_current_screen';
+const SCREENS: Screen[] = ['home', 'journal', 'community', 'flourish', 'spark', 'glow', 'bloom', 'profile'];
+
 export default function Page() {
   const { user, loading, logout } = useAuth();
   const [flow, setFlow] = useState<FlowState>('splash');
@@ -45,6 +48,14 @@ export default function Page() {
     return () => window.removeEventListener('resize', sync);
   }, [user]);
 
+  useEffect(() => {
+    if (!user || typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem(SCREEN_STORAGE_KEY);
+    if (stored && SCREENS.includes(stored as Screen)) {
+      setScreen(stored as Screen);
+    }
+  }, [user]);
+
   // While auth is being restored from localStorage, show nothing
   if (loading) return null;
 
@@ -52,6 +63,9 @@ export default function Page() {
   if (user) {
     const handleNavigate = (s: Screen) => {
       setScreen(s);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(SCREEN_STORAGE_KEY, s);
+      }
     };
 
     const handleLogout = () => {

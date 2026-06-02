@@ -10,14 +10,23 @@ generator client {
 model User {
   id        String   @id @default(cuid())
   name      String
-  email     String   @unique
-  password  String
+  phone     String   @unique
   createdAt DateTime @default(now())
+  lastLoginAt DateTime?
 
   journalEntries JournalEntry[]
   posts          Post[]
   likes          PostLike[]
   comments       PostComment[]
+}
+
+model PhoneVerification {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  name      String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model JournalEntry {
@@ -59,4 +68,40 @@ model PostComment {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   content   String
   createdAt DateTime @default(now())
+}
+
+enum LessonContentType {
+  VIDEO
+  IMAGE
+  TEXT
+}
+
+model Lesson {
+  id             String          @id @default(cuid())
+  title          String
+  summary        String
+  category       String
+  level          String?
+  durationMinutes Int?
+  coverImageUrl  String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  contents LessonContent[]
+}
+
+model LessonContent {
+  id                String             @id @default(cuid())
+  lessonId          String
+  lesson            Lesson             @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  language          String
+  contentType       LessonContentType
+  title             String
+  textBody          String?
+  mediaUrl          String?
+  mediaThumbnailUrl String?
+  durationMinutes   Int?
+  sortOrder         Int                @default(0)
+
+  @@index([lessonId, language])
 }

@@ -1,28 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
 import { signToken } from '@/lib/auth';
+import { normalizePhone } from '@/lib/phone';
 
 export async function POST(req: NextRequest) {
-  const { email, password } = await req.json();
+  const { phone } = await req.json();
 
-  if (!email?.trim() || !password) {
-    return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
+  if (!phone?.trim()) {
+    return NextResponse.json({ error: 'Phone number required' }, { status: 400 });
   }
 
-  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  const normalizedPhone = normalizePhone(phone);
+  const user = await prisma.user.findUnique({ where: { phone: normalizedPhone } });
   if (!user) {
-    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    return NextResponse.json({ error: 'Phone number not registered' }, { status: 404 });
   }
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) {
-    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
-  }
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  });
 
   const token = signToken({ userId: user.id });
   return NextResponse.json({
     token,
-    user: { id: user.id, name: user.name, email: user.email },
+    user: { id: user.id, name: user.name, phone: user.phone },
   });
 }

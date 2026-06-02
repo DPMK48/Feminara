@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="petal" x1="120" y1="90" x2="420" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7CCFDE" />
+      <stop offset="100%" stop-color="#0B4F6C" />
+    </linearGradient>
+    <radialGradient id="core" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 256) scale(90)">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.35" />
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="#F5FBFD" />
+  <g transform="translate(256 256)">
+    <path d="M0 -190 C60 -190 120 -120 120 -40 C120 40 60 110 0 140 C-60 110 -120 40 -120 -40 C-120 -120 -60 -190 0 -190 Z" fill="url(#petal)" />
+    <path d="M190 0 C190 60 120 120 40 120 C-40 120 -110 60 -140 0 C-110 -60 -40 -120 40 -120 C120 -120 190 -60 190 0 Z" fill="url(#petal)" transform="rotate(60)" />
+    <path d="M190 0 C190 60 120 120 40 120 C-40 120 -110 60 -140 0 C-110 -60 -40 -120 40 -120 C120 -120 190 -60 190 0 Z" fill="url(#petal)" transform="rotate(120)" />
+    <path d="M190 0 C190 60 120 120 40 120 C-40 120 -110 60 -140 0 C-110 -60 -40 -120 40 -120 C120 -120 190 -60 190 0 Z" fill="url(#petal)" transform="rotate(180)" />
+    <path d="M190 0 C190 60 120 120 40 120 C-40 120 -110 60 -140 0 C-110 -60 -40 -120 40 -120 C120 -120 190 -60 190 0 Z" fill="url(#petal)" transform="rotate(240)" />
+    <path d="M190 0 C190 60 120 120 40 120 C-40 120 -110 60 -140 0 C-110 -60 -40 -120 40 -120 C120 -120 190 -60 190 0 Z" fill="url(#petal)" transform="rotate(300)" />
+    <circle r="70" fill="url(#core)" />
+  </g>
+</svg>

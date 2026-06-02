@@ -140,7 +140,7 @@ export default function Profile() {
                   Edit
                 </button>
               </div>
-              <p className="text-sm mt-0.5" style={{ color: '#7CCFDE' }}>{user.email}</p>
+              <p className="text-sm mt-0.5" style={{ color: '#7CCFDE' }}>{user.phone}</p>
             </>
           )}
 
