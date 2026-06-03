@@ -1,5 +1,5 @@
-const CACHE_NAME = 'feminara-v1';
-const STATIC_ASSETS = ['/', '/manifest.json'];
+const CACHE_NAME = 'feminara-v2';
+const STATIC_ASSETS = ['/manifest.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -23,20 +23,17 @@ self.addEventListener('fetch', (event) => {
   if (!['http:', 'https:'].includes(url.protocol)) return;
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/')) return;
+  if (event.request.mode === 'navigate' || url.searchParams.has('_rsc')) return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request)
-        .then((res) => {
-          if (res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return res;
-        })
-        .catch(() => cached || new Response('', { status: 504 }));
-
-      return cached || network;
-    })
+    fetch(event.request)
+      .then((res) => {
+        if (res.ok && STATIC_ASSETS.includes(url.pathname)) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(event.request).then((cached) => cached || new Response('', { status: 504 })))
   );
 });
