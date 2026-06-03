@@ -68,6 +68,9 @@ export default function Home({ onNavigate }: HomeProps) {
   const [mood, setMood] = useState<string>('—');
   const [dailyQuote, setDailyQuote] = useState(fallbackQuote);
   const [quoteLoading, setQuoteLoading] = useState(true);
+  const [cycleDay, setCycleDay] = useState<string>('_');
+  const [streakCount, setStreakCount] = useState<string>('0');
+  const [openNotices, setOpenNotices] = useState<Record<string, boolean>>({});
   const today = new Date();
   const hour = today.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -78,6 +81,48 @@ export default function Home({ onNavigate }: HomeProps) {
     if (typeof window === 'undefined') return;
     const savedMood = localStorage.getItem('feminara_mood');
     setMood(savedMood ?? '—');
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem('feminara_glow_active_challenges');
+    if (!stored) {
+      setStreakCount('0');
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        setStreakCount(String(parsed.length));
+        return;
+      }
+    } catch {
+      // Ignore parse issues and fall back to 0.
+    }
+    setStreakCount('0');
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedStart = localStorage.getItem('feminara_period_start');
+    const storedDuration = localStorage.getItem('feminara_period_duration');
+
+    if (!storedStart || !storedDuration) {
+      setCycleDay('_');
+      return;
+    }
+
+    const start = new Date(storedStart);
+    const duration = Number(storedDuration);
+    if (Number.isNaN(start.getTime()) || !Number.isFinite(duration) || duration <= 0) {
+      setCycleDay('_');
+      return;
+    }
+
+    const diff = Math.floor((Date.now() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const day = diff >= 0 ? (diff % duration) + 1 : null;
+    setCycleDay(day ? String(day) : '_');
   }, []);
 
   useEffect(() => {
@@ -118,6 +163,10 @@ export default function Home({ onNavigate }: HomeProps) {
 
     loadQuote();
   }, []);
+
+  const toggleNotice = (title: string) => {
+    setOpenNotices((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
 
   return (
     <div className="section-scroll">
@@ -172,9 +221,9 @@ export default function Home({ onNavigate }: HomeProps) {
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
-            { label: 'Day', value: '14', sub: 'of cycle' },
+            { label: 'Day', value: cycleDay, sub: 'of cycle' },
             { label: 'Mood', value: mood, sub: 'today' },
-            { label: 'Streak', value: '7', sub: 'days' },
+            { label: 'Streak', value: streakCount, sub: 'active challenges' },
           ].map((stat) => (
             <div key={stat.label} className="card text-center py-3 px-2">
               <p className="text-xl font-bold" style={{ color: '#0B4F6C' }}>
@@ -197,19 +246,27 @@ export default function Home({ onNavigate }: HomeProps) {
               key={card.id}
               className="section-tile-compact"
               onClick={() => onNavigate(card.id)}
+              style={{
+                background: '#0B4F6C',
+                color: '#fff',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+              }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)';
+                (e.currentTarget as HTMLElement).style.background = '#2A6C86';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = '';
+                (e.currentTarget as HTMLElement).style.background = '#0B4F6C';
               }}
             >
-              <div className={`section-tile-compact__icon ${card.grad}`}>
-                <AppIcon name={card.icon} size={26} className="text-white" />
-              </div>
               <div className="section-tile-compact__text">
-                <p className="section-tile-compact__title">{card.title}</p>
-                <p className="section-tile-compact__sub">{card.sub}</p>
+                <p className="section-tile-compact__title" style={{ color: '#fff' }}>{card.title}</p>
+                <p className="section-tile-compact__sub" style={{ color: 'rgba(255,255,255,0.8)' }}>{card.sub}</p>
               </div>
             </button>
           ))}
@@ -217,26 +274,59 @@ export default function Home({ onNavigate }: HomeProps) {
 
         {/* Notice */}
         <h2 className="text-base font-semibold mb-3" style={{ color: '#0B4F6C' }}>
-          Notice!
+          Alert!
         </h2>
         <div className="flex flex-col gap-4 mb-6">
-          {notices.map((notice) => (
-            <div key={notice.title} className="notice-card">
-              <div className="notice-card__header">
-                <span className="notice-card__tag">{notice.tag}</span>
-                <span className="notice-card__time">{notice.time}</span>
+          {notices.map((notice) => {
+            const isOpen = Boolean(openNotices[notice.title]);
+            return (
+              <div key={notice.title} className="notice-card">
+                <div className="notice-card__header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span className="notice-card__tag">{notice.tag}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span className="notice-card__time">{notice.time}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleNotice(notice.title)}
+                      aria-expanded={isOpen}
+                      aria-label={isOpen ? 'Collapse alert details' : 'Expand alert details'}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#2899B4',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <AppIcon
+                        name="chevronDown"
+                        size={16}
+                        className="text-[#2899B4]"
+                        style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 160ms ease' }}
+                      />
+                    </button>
+                  </div>
+                </div>
+                <h3 className="notice-card__title">{notice.title}</h3>
+                {isOpen && (
+                  <>
+                    <p className="notice-card__detail">{notice.detail}</p>
+                    <div className="notice-card__tips">
+                      {notice.tips.map((tip) => (
+                        <span key={tip} className="notice-card__tip">
+                          {tip}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-              <h3 className="notice-card__title">{notice.title}</h3>
-              <p className="notice-card__detail">{notice.detail}</p>
-              <div className="notice-card__tips">
-                {notice.tips.map((tip) => (
-                  <span key={tip} className="notice-card__tip">
-                    {tip}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

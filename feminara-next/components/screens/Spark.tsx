@@ -16,11 +16,38 @@ type Lesson = {
   media: LessonMedia[];
   accent: string;
   icon: AppIconName;
+  videoUrl?: string;
 };
 
 const availableLanguages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
 
 const lessons: Lesson[] = [
+  {
+    id: 'spark-6',
+    title: 'Fear of making it',
+    summary: 'Push through uncertainty and embrace your potential.',
+    category: 'Mindset',
+    level: 'All',
+    duration: '30 sec',
+    languages: ['English'],
+    media: ['video'],
+    accent: '#1E88E5',
+    icon: 'sparkles',
+    videoUrl: '/Fear of making it.mp4',
+  },
+  {
+    id: 'spark-7',
+    title: 'Overthinking',
+    summary: 'Break the cycle of worry and find mental clarity.',
+    category: 'Wellness',
+    level: 'All',
+    duration: '30 sec',
+    languages: ['English'],
+    media: ['video'],
+    accent: '#2A9D8F',
+    icon: 'heart',
+    videoUrl: '/Overthinking.mp4',
+  },
   {
     id: 'spark-1',
     title: 'Safe Money, Safe Family',
@@ -91,6 +118,56 @@ const mediaLabels: Record<LessonMedia, { label: string; color: string; bg: strin
 
 export default function Spark() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>(availableLanguages[0]);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+
+  if (selectedLesson) {
+    return (
+      <div className="section-scroll">
+        <div className="screen-hdr" style={{ paddingTop: 28 }}>
+          <button
+            onClick={() => setSelectedLesson(null)}
+            className="mb-4 flex items-center gap-2 text-sm font-medium"
+            style={{ color: '#2899B4', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            ← Back to Lessons
+          </button>
+          
+          <div className="card p-6">
+            <h1 className="text-2xl font-bold mb-2" style={{ color: '#0B4F6C' }}>{selectedLesson.title}</h1>
+            <p className="text-sm mb-6" style={{ color: '#4E7C8A' }}>{selectedLesson.summary}</p>
+            
+            {selectedLesson.videoUrl && (
+              <div className="rounded-2xl overflow-hidden mb-6 bg-black">
+                <video 
+                  src={selectedLesson.videoUrl} 
+                  controls 
+                  className="w-full h-auto block"
+                />
+              </div>
+            )}
+            
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <div className="text-xs px-3 py-1 bg-slate-100 rounded-full">{selectedLesson.category}</div>
+                <div className="text-xs px-3 py-1 bg-slate-100 rounded-full">{selectedLesson.level}</div>
+                <div className="text-xs px-3 py-1 bg-slate-100 rounded-full">{selectedLesson.duration}</div>
+              </div>
+              
+              <div className="mt-4 prose prose-sm max-w-none">
+                <h3 style={{ color: '#0B4F6C' }}>Lesson Content</h3>
+                <p>This lesson provides comprehensive guidance on {selectedLesson.title.toLowerCase()}. Follow the instructions in the video or read the summary above to get started.</p>
+                <ul>
+                  <li>Focus: {selectedLesson.category}</li>
+                  <li>Skill Level: {selectedLesson.level}</li>
+                  <li>Time required: {selectedLesson.duration}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -170,78 +247,69 @@ export default function Spark() {
         </div>
 
         {/* Featured lesson */}
-        <div
-          className="card p-5 mb-5 spark-reveal"
-          style={{
-            background: 'linear-gradient(135deg, #E7F2FF 0%, #F6FBFF 100%)',
-            border: '1px solid #DCEEFF',
-          }}
-        >
-          <div className="flex flex-col gap-4 md:flex-row md:items-center">
-            <div style={{ flex: 1 }}>
-              <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: '#7CCFDE' }}>
-                Featured lesson
-              </p>
-              <h2 className="text-lg font-bold mt-1" style={{ color: '#0B4F6C' }}>
-                Build a Simple Budget
-              </h2>
-              <p className="text-sm mt-2" style={{ color: '#4E7C8A' }}>
-                Watch a short video, view picture steps, and read a clear guide. Simple words, real examples.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {['English', 'Igbo'].map((lang) => (
-                  <span
-                    key={lang}
-                    className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                    style={{ background: '#DCEEFF', color: '#1565C0' }}
-                  >
-                    {lang}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div
-              className="rounded-2xl p-4"
-              style={{
-                width: '100%',
-                maxWidth: 240,
-                background: 'linear-gradient(135deg, #1565C0 0%, #1E88E5 100%)',
-                color: '#fff',
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <AppIcon name="upload" size={18} className="text-white" />
-                <span className="text-xs font-semibold">Video preview</span>
+        {(selectedLanguage === 'English' || selectedLanguage === 'Hausa') && (
+          <div
+            className="card p-5 mb-5 spark-reveal"
+            style={{
+              background: 'linear-gradient(135deg, #E7F2FF 0%, #F6FBFF 100%)',
+              border: '1px solid #DCEEFF',
+            }}
+          >
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+              <div style={{ flex: 1 }}>
+                <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: '#7CCFDE' }}>
+                  Featured lesson
+                </p>
+                <h2 className="text-lg font-bold mt-1" style={{ color: '#0B4F6C' }}>
+                  Build a Simple Budget
+                </h2>
+                <p className="text-sm mt-2" style={{ color: '#4E7C8A' }}>
+                  Watch a short video, view picture steps, and read a clear guide. Simple words, real examples.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {['English', 'Hausa'].map((lang) => (
+                    <span
+                      key={lang}
+                      className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                      style={{ background: '#DCEEFF', color: '#1565C0' }}
+                    >
+                      {lang}
+                    </span>
+                  ))}
+                </div>
               </div>
               <div
-                className="rounded-xl"
+                className="rounded-2xl p-4"
                 style={{
-                  height: 120,
-                  background: 'rgba(255,255,255,0.18)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 12,
-                  fontWeight: 600,
+                  width: '100%',
+                  maxWidth: 240,
+                  background: 'linear-gradient(135deg, #1565C0 0%, #1E88E5 100%)',
+                  color: '#fff',
                 }}
               >
-                Play when ready
+                <div
+                  className="rounded-xl overflow-hidden"
+                  style={{
+                    height: 120,
+                    background: 'rgba(255,255,255,0.18)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  <video 
+                    src="/Hausa video.mp4" 
+                    controls 
+                    className="w-full h-full object-cover"
+                    style={{ borderRadius: 12 }}
+                  />
+                </div>
               </div>
-              <button
-                className="mt-3 w-full text-xs font-semibold"
-                style={{
-                  background: '#fff',
-                  color: '#1565C0',
-                  borderRadius: 10,
-                  padding: '8px 12px',
-                  border: 'none',
-                }}
-              >
-                Start lesson
-              </button>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Lesson cards */}
         <div className="flex items-center justify-between mb-3">
@@ -256,10 +324,12 @@ export default function Spark() {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-          {lessons.map((lesson, index) => (
-            <div
-              key={lesson.id}
-              className="card p-4 spark-reveal"
+          {lessons
+            .filter((l) => l.languages.includes(selectedLanguage))
+            .map((lesson, index) => (
+              <div
+                key={lesson.id}
+                className="card p-4 spark-reveal"
               style={{
                 borderLeft: `4px solid ${lesson.accent}`,
                 animationDelay: `${index * 90}ms`,
@@ -310,6 +380,16 @@ export default function Spark() {
                 ))}
               </div>
 
+              {lesson.videoUrl && (
+                <div className="mt-3 rounded-xl overflow-hidden bg-black/5" style={{ maxHeight: 300 }}>
+                  <video 
+                    src={lesson.videoUrl} 
+                    controls 
+                    className="w-full h-auto block"
+                  />
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-2 mt-3">
                 {lesson.languages
                   .filter((lang) => lang === selectedLanguage)
@@ -329,6 +409,7 @@ export default function Spark() {
                   {lesson.level} · {lesson.duration}
                 </div>
                 <button
+                  onClick={() => setSelectedLesson(lesson)}
                   className="text-xs font-semibold"
                   style={{
                     border: 'none',
@@ -336,6 +417,7 @@ export default function Spark() {
                     color: '#fff',
                     borderRadius: 10,
                     padding: '6px 12px',
+                    cursor: 'pointer'
                   }}
                 >
                   Open

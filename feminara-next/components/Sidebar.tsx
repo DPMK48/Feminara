@@ -32,7 +32,7 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
     <nav id="sidebar">
       {/* Logo */}
       <div className="flex items-center gap-3 px-3 mb-6 w-full">
-        <FlowerLogo size={36} color="white" centerColor="#7CCFDE" />
+        <FlowerLogo size={36} />
         <span
           className="sb-logo-text hidden text-white font-bold text-lg tracking-wide"
           style={{ display: 'none' }}

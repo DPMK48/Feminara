@@ -19,7 +19,7 @@ const slides: { icon: AppIconName; title: string; desc: string; bg: string }[] =
     icon: 'flower',
     title: 'Understand Your Cycle',
     desc: 'Log symptoms, predict periods, track fertility, and understand your body on a deeper level.',
-    bg: 'linear-gradient(160deg,#3949AB,#5C6BC0)',
+    bg: 'linear-gradient(160deg,#0B4F6C,#00838F)',
   },
   {
     icon: 'sparkles',
@@ -50,7 +50,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     >
       {/* Logo small */}
       <div className="flex items-center gap-2 self-start">
-        <FlowerLogo size={28} color="white" centerColor="rgba(255,255,255,0.35)" />
+        <FlowerLogo size={28} />
         <span className="font-semibold text-sm tracking-widest opacity-80">FEMINARA</span>
       </div>
 

@@ -6,8 +6,8 @@ interface FlowerLogoProps {
 
 export default function FlowerLogo({
   size = 58,
-  color = 'white',
-  centerColor = '#2899B4',
+  color = '#1A7D8A',
+  centerColor = 'white',
 }: FlowerLogoProps) {
   return (
     <svg

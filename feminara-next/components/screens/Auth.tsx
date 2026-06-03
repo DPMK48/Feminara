@@ -83,19 +83,7 @@ export default function Auth({ onAuth }: AuthProps) {
     >
       {/* Logo */}
       <div className="flex flex-col items-center gap-2 mb-8">
-        <div
-          style={{
-            width: 70,
-            height: 70,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg,#2899B4,#0B4F6C)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <FlowerLogo size={48} color="white" centerColor="rgba(255,255,255,0.3)" />
-        </div>
+        <FlowerLogo size={70} />
         <h1 className="font-bold text-xl tracking-widest" style={{ color: '#0B4F6C' }}>
           FEMINARA
         </h1>

@@ -12,7 +12,7 @@ export default function Splash({ onContinue }: SplashProps) {
       <div className="flex flex-col items-center justify-center gap-6 px-8 text-center" style={{ flex: 1 }}>
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
-          <FlowerLogo size={80} color="white" centerColor="rgba(255,255,255,0.3)" />
+          <FlowerLogo size={80} />
           <h1
             className="text-white font-bold tracking-[0.22em] text-3xl"
             style={{ letterSpacing: '0.22em' }}
