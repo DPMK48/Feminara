@@ -60,7 +60,7 @@ export default function Auth({ onAuth }: AuthProps) {
       if (tab === 'signup' && signupStep === 'details') {
         setSignupStep('verify');
         if (data?.simulatedCode) {
-          setInfo(`Dev mode: use code ${data.simulatedCode} to verify.`);
+          setInfo(`Test mode: use code ${data.simulatedCode} to verify.`);
         } else {
           setInfo('We sent a verification code to your phone.');
         }
